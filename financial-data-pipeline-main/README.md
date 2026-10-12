@@ -13,56 +13,11 @@ This project builds that workflow for three financial datasets (market prices, p
 
 ---
 
-## Results
 
-| Dataset | Rows Ingested | Rows Passed | Issues Found |
-|---|---|---|---|
-| Market Prices | 152 | 144 | Null prices, negative prices, bid > ask inversions, bad currency codes, duplicate ISINs |
-| Portfolio Positions | 245 | 236 | Null account IDs, zero quantities, negative market values, bad currencies |
-| Transactions | 150 | 142 | Null account IDs, invalid transaction types, zero quantities |
 
-All quality issues are seeded intentionally into the sample data to show detection working.
 
 ---
 
-## Project Structure
-
-```
-financial-data-pipeline/
-├── app.py                         # Streamlit entry point
-├── requirements.txt
-├── config/
-│   └── pipeline.yaml              # quality rules per dataset
-├── data/
-│   └── raw/                       # input CSV files
-├── src/
-│   ├── models.py                  # PipelineRun, QualityCheck, QualityRule dataclasses
-│   ├── database.py                # SQLite: init, insert, fetch
-│   ├── ingestion/
-│   │   └── loader.py              # CSV reader with encoding detection
-│   ├── quality/
-│   │   └── engine.py              # runs all quality checks, returns clean df + check results
-│   ├── transformation/
-│   │   └── transforms.py          # per-dataset transforms + derived columns
-│   └── orchestration/
-│       ├── config_loader.py       # YAML -> DatasetConfig
-│       ├── pipeline.py            # sequences all stages for one dataset
-│       └── scheduler.py          # APScheduler wrapper for background runs
-└── scripts/
-    └── generate_sample_data.py    # generates 3 datasets with seeded quality issues
-```
-
----
-
-## Pipeline Stages
-
-**1. Ingest** - reads the raw CSV, normalises column names to snake_case, handles encoding automatically (UTF-8, UTF-8-BOM, latin-1 fallback).
-
-**2. Quality checks** - runs all rules from `pipeline.yaml` against the raw dataframe. Each check returns a pass/fail result with the expected value, actual value, and number of rows affected. HIGH severity failures mark those rows for exclusion.
-
-**3. Transform** - runs only on clean rows. Coerces numeric columns, standardises strings, parses dates, and adds derived columns.
-
-**4. Load** - inserts clean rows to SQLite. Records the pipeline run metadata and all quality check results so the dashboard can show history.
 
 ---
 
@@ -154,13 +109,6 @@ Fixed by calling `db.init_db()` at startup (creates tables if missing), committi
 
 ---
 
-## What I'd Add Next
 
-- Replace the custom quality engine with Great Expectations, keeping the YAML config as the expectation suite
-- dbt models for the transformation layer so transforms are SQL-based and self-documenting
-- Parquet output partitioned by date, which makes time-series quality trending much easier
-- Alerting on HIGH severity failures so you don't have to check the dashboard manually
 
----
 
-*[Kunal Deokar](https://github.com/aiwithkd)*

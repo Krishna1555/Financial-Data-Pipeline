@@ -2,7 +2,6 @@
 
 An end-to-end data pipeline for financial datasets - raw CSV ingestion, configurable quality checks, transformation with derived metrics, SQLite storage, and a Streamlit dashboard for monitoring pipeline runs and data quality.
 
-**Live App: [financial-data-pipeline-aiwithkd.streamlit.app](https://financial-data-pipeline-aiwithkd.streamlit.app)**
 
 ---
 
